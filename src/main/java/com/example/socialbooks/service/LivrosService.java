@@ -1,6 +1,8 @@
 package com.example.socialbooks.service;
 
+import com.example.socialbooks.domain.Comentario;
 import com.example.socialbooks.domain.Livro;
+import com.example.socialbooks.repository.ComentarioRepository;
 import com.example.socialbooks.repository.LivroRepository;
 import com.example.socialbooks.service.exceptions.LivroNaoEncontradoExcption;
 import org.springframework.beans.BeanUtils;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +23,9 @@ public class LivrosService {
 
     @Autowired
     private LivroRepository livroRepository;
+
+    @Autowired
+    private ComentarioRepository comentarioRepository;
 
     public ResponseEntity<Void> salvar(Livro livro) {
         Livro livroSalvo = livroRepository.save(livro);
@@ -30,20 +36,18 @@ public class LivrosService {
     }
 
     public ResponseEntity<Void> deletar(Long id) {
-
-        Optional<Livro> livroOptional = livroRepository.findById(id);
-        livroOptional.orElseThrow(() -> new LivroNaoEncontradoExcption("Livro não encontrado!"));
+        buscarLivro(id);
         livroRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<Livro> atualizar(Long id, Livro livro) {
-        Optional<Livro> livroOptional = livroRepository.findById(id);
-        Livro livroAtualizar = livroOptional.orElseThrow(() -> new LivroNaoEncontradoExcption("Livro não encontrado!"));
+        Livro livroAtualizar = buscarLivro(id);
         BeanUtils.copyProperties(livro, livroAtualizar, "id");
         livroRepository.save(livroAtualizar);
         return ResponseEntity.ok(livroAtualizar);
     }
+
 
     public ResponseEntity<Livro> buscar(Long id) {
         Optional<Livro> livroOptional = livroRepository.findById(id);
@@ -52,5 +56,24 @@ public class LivrosService {
 
     public ResponseEntity<List<Livro>> listar() {
         return ResponseEntity.status(HttpStatus.OK).body(livroRepository.findAll());
+    }
+
+    public ResponseEntity<Livro> adicionarComentario(Long id, Comentario comentario) {
+        Livro livro = buscarLivro(id);
+        comentario.setLivro(livro);
+        comentarioRepository.save(comentario);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .buildAndExpand(id).toUri();
+        return ResponseEntity.created(uri).build();
+    }
+
+    public ResponseEntity<List<Comentario>> listarComentarios(Long id) {
+        Livro livro = buscarLivro(id);
+        return ResponseEntity.ok(livro.getComentarios());
+    }
+
+    private Livro buscarLivro(Long id) {
+        Optional<Livro> livroOptional = livroRepository.findById(id);
+        return livroOptional.orElseThrow(() -> new LivroNaoEncontradoExcption("Livro não encontrado!"));
     }
 }
