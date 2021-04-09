@@ -38,7 +38,8 @@ public class LivrosService {
     }
 
     public ResponseEntity<Livro> atualizar(Long id, Livro livro) {
-        Livro livroAtualizar = livroRepository.findById(id).get();
+        Optional<Livro> livroOptional = livroRepository.findById(id);
+        Livro livroAtualizar = livroOptional.orElseThrow(() -> new LivroNaoEncontradoExcption("Livro não encontrado!"));
         BeanUtils.copyProperties(livro, livroAtualizar, "id");
         livroRepository.save(livroAtualizar);
         return ResponseEntity.ok(livroAtualizar);
