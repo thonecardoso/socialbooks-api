@@ -8,8 +8,11 @@ import com.example.socialbooks.service.exceptions.LivroNaoEncontradoExcption;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class LivrosService {
@@ -56,13 +60,18 @@ public class LivrosService {
     }
 
     public ResponseEntity<List<Livro>> listar() {
-        return ResponseEntity.status(HttpStatus.OK).body(livroRepository.findAll());
+        CacheControl cacheControl = CacheControl.maxAge(20, TimeUnit.SECONDS);
+        return ResponseEntity.status(HttpStatus.OK).cacheControl(cacheControl).body(livroRepository.findAll());
     }
 
     public ResponseEntity<Livro> adicionarComentario(Long id, Comentario comentario) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         Livro livro = buscarLivro(id);
         comentario.setLivro(livro);
         comentario.setData(new Date());
+        comentario.setUsuario(auth.getName());
         comentarioRepository.save(comentario);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .buildAndExpand(id).toUri();
