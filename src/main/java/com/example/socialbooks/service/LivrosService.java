@@ -15,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +62,7 @@ public class LivrosService {
     public ResponseEntity<Livro> adicionarComentario(Long id, Comentario comentario) {
         Livro livro = buscarLivro(id);
         comentario.setLivro(livro);
+        comentario.setData(new Date());
         comentarioRepository.save(comentario);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .buildAndExpand(id).toUri();

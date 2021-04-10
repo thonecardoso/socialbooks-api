@@ -1,5 +1,6 @@
 package com.example.socialbooks.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -26,6 +27,7 @@ public class Livro {
     private String nome;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private Date publicado;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,9 +37,11 @@ public class Livro {
     private String resumo;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @OneToMany(mappedBy = "livro")
+    @OneToMany(mappedBy = "livro", orphanRemoval = true)
     private List<Comentario> comentarios;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private  String  autor;
+    @ManyToOne
+    @JoinColumn(name = "autor_id")
+    private  Autor  autor;
 }

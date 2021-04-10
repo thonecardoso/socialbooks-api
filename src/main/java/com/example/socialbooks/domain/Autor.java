@@ -4,30 +4,31 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.NonNull;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
-@Data
 @Entity
-public class Comentario {
+@Data
+public class Autor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String texto;
+    @NotEmpty(message = "O Campo nome não pode ser vázio!")
+    @NotNull(message = "O campo nome não pode ser nulo")
+    private String nome;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String usuario;
+    @OneToMany(mappedBy = "autor")
+    @JsonIgnore
+    private List<Livro> livros;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonFormat(pattern = "dd/MM/yyyy")
-    private Date data;
-
-    @ManyToOne
-    @JoinColumn(name = "livro_id")
-    @JsonIgnore
-    private Livro livro;
-
+    private Date nascimento;
 }
