@@ -26,7 +26,7 @@ public class AutoresService {
         return ResponseEntity.ok(autoresRepository.findAll());
     }
 
-    public ResponseEntity<Void> salvar(Autor autor) {
+    public ResponseEntity<Autor> salvar(Autor autor) {
         if(autor.getId()!=null){
             Optional<Autor> autorOptional = autoresRepository.findById(autor.getId());
             if(autorOptional.isPresent()){
@@ -38,7 +38,7 @@ public class AutoresService {
         Autor autorSalvo = autoresRepository.save(autor);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(autorSalvo.getId()).toUri();
-        return ResponseEntity.created(uri).build();
+        return ResponseEntity.created(uri).body(autorSalvo);
     }
 
     public ResponseEntity<Autor> buscar(Long id) {
